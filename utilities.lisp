@@ -5,6 +5,10 @@
   (let ((str-val (write-to-string val)))
     (string= str-val (reverse str-val))))
 
+;;; use an ecase to merge these into a single utility
+(defun palindrome-str-p (str)
+  (string= str (reverse str)))
+
 (defun range (start end &optional (increment 1))
   (loop for i from start to end by increment collecting i))
 

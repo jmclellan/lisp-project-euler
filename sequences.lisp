@@ -1,5 +1,5 @@
 (in-package :euler)
-
+;;;;; counld be renames to something other than sequenceces (maby numberic sequences)
 (defun fib-assist (n-2 n-1)
   (+ n-2 n-1))
 

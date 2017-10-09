@@ -450,12 +450,144 @@
 
 ;;; 31-47 tbd
 
-(defun euler-problem-48 (ceiling-value)
-  (loop for i from 1 to ceiling-value
-        summing (expt i i)))
+;;; 32
 
-(defun euler-48 ()
-  (mod (euler-problem-48 1000) (expt 10 10)))
+(defun make-all-32-records (pandigital-str)
+  (all-lex-perms pandigital-str))
+
+(defun break-in-three (str)
+  (loop 
+    with tuples-lst = nil 
+    for first-bound from 1 to (- (length str) 2)
+    as first-term = (subseq str 0 first-bound)
+    do (loop for second-bound from (1+ first-bound) to (- (length str) 1)
+             as second-term = (subseq str first-bound second-bound)
+             as third-term = (subseq str second-bound)
+             do (push (list first-term second-term third-term) tuples-lst))
+    finally (return tuples-lst)))
+
+(defun euler-32-valid-idenitty (first-term second-term third-term)
+  (= (* (read-from-string first-term)
+        (read-from-string second-term))
+     (read-from-string third-term)))
+
+(defun euler-problem-32 (pandigital-seed-str)
+  (let* ((permutations (all-lex-perms pandigital-seed-str))
+         (valid-tuples (mapcan (lambda (perm)
+                                 (remove-if-not (lambda (tuple)
+                                                  (apply #'euler-32-valid-idenitty tuple))
+                                                (break-in-three perm)))
+                               permutations)))
+    (reduce #'+ (remove-duplicates
+                 (mapcar #'third valid-tuples)
+                 :test #'string=)
+            :key #'read-from-string)))
+
+;; euler 33
+;;; going to take this chance to play with lisp fraction types
+;;; ultimatly want a #'curious-fraction-p fn out of this
+
+(defun invalid-simplify (numerator denominator)
+  (assert (and (> numerator 9)   (< numerator 100)
+               (> denominator 9) (< denominator 100))
+          (numerator denominator))
+  (let ((str-numer (write-to-string numerator))
+        (str-denom (write-to-string denominator)))
+    (ignore-errors ;; excessive and dangerous way to handle divide by 0 errors
+     (cond ((char= (aref str-numer 0) (aref str-denom 1))
+            (/ (digit-char-p (aref str-numer 1)) (digit-char-p (aref str-denom 0))))
+           ((char= (aref str-numer 1) (aref str-denom 0))
+            (/ (digit-char-p (aref str-numer 0)) (digit-char-p (aref str-denom 1))))
+           (t nil)))))
+
+(defun curious-fraction-p (num denom) ;; should be moved into a cl file for these types
+  (let ((simplified-fraction (invalid-simplify num denom)))
+    (and simplified-fraction
+         (= (/ num denom) simplified-fraction))))
+
+(defun euler-problem-33 () ;; solved for all two digits instead of something more applicable
+  (let (curious-fractions)
+    (mapcan #'(lambda (denom)
+                (mapcar #'(lambda (numer)
+                            (when (curious-fraction-p numer denom)
+                              (push (list numer denom) curious-fractions)))
+                        (range 10 denom)))
+            (range 10 99))
+    (print (denominator
+     (print (reduce #'*
+             (print (remove-if (lambda (fraction-pair) ;; remove trivial examples
+                         (= (first fraction-pair) (second fraction-pair)))
+                      (print curious-fractions)))
+            :key (lambda (lst) (apply #'/ lst))
+            :initial-value 1))))))
+
+(defun euler-33 ()
+  (euler-problem-33))
+
+(defun curious-number-p (number)
+  "curious number is one whose value is equal to the sum of the factorial of its digits"
+  (assert (> number 9))
+  (= number (reduce #'+ (write-to-string number)
+                    :key (lambda (char)
+                           (factorial (digit-char-p char))))))
+
+
+;;; setting an upper bound: 9! = 352880
+;;; our upper bound is the number of digits where even at all 9 the factorial digit sum is below
+;;; the total
+;;; 
+
+;;;i        10^i       9!*i
+;;;1           10       362880
+;;;2          100       725760
+;;;3         1000      1088640
+;;;4        10000      1451520
+;;;5       100000      1814400
+;;;6      1000000      2177280
+;;;7     10000000      2540160
+;;;8    100000000      2903040
+;;;9   1000000000      3265920
+;;;10  10000000000      3628800
+
+;; based on that table (expt 10 6) will be our upper limit
+
+(defun euler-problem-34 (upper-bound)
+  (reduce #'+
+          (remove-if-not #'curious-number-p
+                             (range 10 upper-bound))))
+
+(defun euler-34 ()
+  (euler-problem-34 (expt 10 6)))
+
+(defun all-lex-rotations (str)
+  (loop for i from 0 to (1- (length str))
+        collecting (concatenate 'string (subseq str i) (subseq str 0 i))))
+
+(defun circular-prime-p (num)
+  (every #'(lambda (prime-str)
+             (slow-prime-p (read-from-string prime-str)))
+         (all-lex-rotations (write-to-string num))))
+
+(defun euler-problem-35 (upper-bound)
+  (loop
+    with prime-engine = (create-prime-generator)
+    as current-prime = (funcall prime-engine)
+    until (>= current-prime upper-bound)  
+    when (circular-prime-p current-prime)
+      collect current-prime into cirular-prime-lst
+    finally (return (values (length cirular-prime-lst)
+                            cirular-prime-lst))))
+
+(defun euler-35 ()
+  (euler-problem-35 (expt 10 6)))
+
+(defun double-base-palindrome (val)
+    (and (palindrome-str-p (write-to-string val))
+         (palindrome-str-p (write-to-string val :base 2))))
+
+(defun euler-problem-36 (upper-bound)
+  (reduce #'+ (remove-if-not #'double-base-palindrome (range 1 upper-bound))))
+
 
 ;;; 47 - distinct prime factors
 
