@@ -701,6 +701,42 @@
   (with-open-file (file-stream "resources/p042_words.txt" :direction :input)
    (euler-problem-42 (mapcar #'read-from-string (cl-ppcre:split "," (read-line file-stream))))))
 
+(defun euler-43 ()
+  (labels ((prime-sub-divisible-p (str)
+             (and (zerop (mod (read-from-string (subseq str 1 4)) 2))
+                  (zerop (mod (read-from-string (subseq str 2 5)) 3))
+                  (zerop (mod (read-from-string (subseq str 3 6)) 5))
+                  (zerop (mod (read-from-string (subseq str 4 7)) 7))
+                  (zerop (mod (read-from-string (subseq str 5 8)) 11))
+                  (zerop (mod (read-from-string (subseq str 6 9)) 13))
+                  (zerop (mod (read-from-string (subseq str 7 10)) 17)))))
+           
+                               
+    (reduce #'+ (all-lex-perms "0123456789") :key #'(lambda (str)
+                                                    (if (prime-sub-divisible-p str)
+                                                        (read-from-string str)
+                                                        0)))))
+
+(defun euler-44 () ;;; NEED TO INCREASE SPEED FOR THIS TO BE ACCEPABLE
+  (let ((pentagon-numbers)
+        (generator (create-pentagon-generator)))
+    (loop as next-in-seq = (funcall generator)
+          as d-lst = (mapcar (lambda (cached-val)
+                               (list (- next-in-seq cached-val)
+                                     (+ next-in-seq cached-val)))
+                             pentagon-numbers)
+          as pent-d-lst = (remove-if-not #'(lambda (lst)
+                                             (every #'pentagon-number-p lst))
+                                         d-lst)
+          when pent-d-lst
+            return (sort pent-d-lst #'< :key #'first)
+          do (push next-in-seq pentagon-numbers))))
+
+
+
+
+
+  )
 
 ;;; 47 - distinct prime factors
 
