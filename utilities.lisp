@@ -23,6 +23,18 @@
 (defun nth-triangle-number (n)
   (/ (* n (+ n 1)) 2))
 
+(let ((n 1)
+      (triangle-cache (list (nth-triangle-number 1))))
+      (defun triangle-number-p (val)
+        (if (> val (car triangle-cache)) ;; if it is bigger we need to add valued till we can cover it
+            (loop as next-triangle-number = (nth-triangle-number (incf n)) ;; destructive modification
+                  collecting next-triangle-number into cache-additions
+                  when (>= next-triangle-number val)
+                    ;; we could improve speed of this fn by getting rid of the call to sort
+                    do (setf triangle-cache (sort (append cache-additions triangle-cache) #'>))
+                    and return (triangle-number-p val))
+            (member val triangle-cache :test #'=))))
+
 (defun collect-divisors (n)
   (loop for possible-divisor from 1 to (sqrt n)
         as result = (/ n possible-divisor)

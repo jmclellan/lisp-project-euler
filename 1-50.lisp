@@ -691,6 +691,17 @@
         when pandigital-primes
           return (car pandigital-primes)))
 
+(defun euler-problem-42 (list-of-words)
+  ;; careful score string requires all words only have aplha characters
+  (count-if (lambda (str)
+              (triangle-number-p (score-string str)))
+            list-of-words))
+
+(defun euler-42 ()
+  (with-open-file (file-stream "resources/p042_words.txt" :direction :input)
+   (euler-problem-42 (mapcar #'read-from-string (cl-ppcre:split "," (read-line file-stream))))))
+
+
 ;;; 47 - distinct prime factors
 
 (defun euler-problem-47 (distinct-factors consecutive-ints)
