@@ -588,6 +588,75 @@
 (defun euler-problem-36 (upper-bound)
   (reduce #'+ (remove-if-not #'double-base-palindrome (range 1 upper-bound))))
 
+(defun euler-36 ()
+  (euler-problem-36 (expt 10 6)))
+
+(defun truncatable-prime-p (val)
+  (flet ((prime-p (val)
+           (if (= val 1)
+               nil
+               (slow-prime-p val))))
+      (loop
+    with str-val = (write-to-string val)
+    for index below (length str-val)
+    collecting (subseq str-val index) into prime-strs
+    collecting (subseq str-val 0 (- (length str-val) index)) into prime-strs
+    finally (return (every #'(lambda (trunc-str)
+                               (prime-p (read-from-string trunc-str)))
+                           prime-strs)))))
+
+;; lets first attempt to see what happens if we just run until we find all 11 without any
+;; work to minimize the search space besides just looking at primes
+(defun euler-problem-37 ()
+  (loop with prime-engine = (create-prime-generator)
+        as prime = (funcall prime-engine)
+        when (and (> prime 7) (truncatable-prime-p prime))
+          collect prime into valid-prime-lst
+        until (> (length valid-prime-lst) 10)
+        finally (return (reduce #'+ valid-prime-lst))))
+
+(defun euler-37 ()
+  (euler-problem-37))
+
+
+(defun concatenate-operation (val set fn &key (format-str "~{~d~}"))
+  (format nil format-str (mapcar #'(lambda (set-val)
+                                   (funcall fn val set-val))
+                                 set))
+  )
+ 
+(defun concat-product (val set)
+  (declare (inline concatenate-operation))
+  (concatenate-operation val set #'*))
+
+;;;38 start off with all the 9 digit pandigital numbers
+;; then sort them so that the first match will be our largest match
+;; it would be faster to return them on the go but w/e
+;;
+
+(defun valid-set (base-val original-str)
+  (loop with generated-str = (write-to-string base-val)
+        for multiplier in (range 2 9)
+        do (setf generated-str (format nil "~a~d" generated-str (* base-val multiplier)))
+        never (or (> (length generated-str) (length original-str))
+                  (string/= generated-str original-str :end2 (length generated-str)))
+        when (string= generated-str original-str)
+          return t))
+
+
+(defun pandigital-multiple (pandigital-str)
+  (loop for index from 4 downto 1
+        as root-val = (subseq pandigital-str 0 index)
+        when (valid-set (read-from-string root-val)
+                        pandigital-str)
+          return root-val))
+
+(defun euler-38 ()
+  (loop for pandigital-str in (all-lex-perms "987654321")
+        when (pandigital-multiple pandigital-str)
+          return pandigital-str))
+
+
 
 ;;; 47 - distinct prime factors
 

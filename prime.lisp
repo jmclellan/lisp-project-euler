@@ -1,10 +1,12 @@
 (in-package :euler)
 
 (defun slow-prime-p (val)
-  (loop for i from 2 to (sqrt val)
-        when (integerp (/ val i))
-          return (values nil (/ val i))
-        finally (return t)))
+  (if (= 1 val)
+      nil
+      (loop for i from 2 to (sqrt val)
+            when (integerp (/ val i))
+              return (values nil (/ val i))
+            finally (return t))))
 
 
 (defun slow-prime-factorization (val)
