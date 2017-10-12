@@ -1,11 +1,12 @@
 (in-package :euler)
 
 (defun euler-problem-1 (ceiling-value)
-  (loop for i from 1 to ceiling-value
-        when (or (zerop (mod i 3)) (zerop (mod i 5)))
+  (loop for i below ceiling-value
+        when (or (zerop (mod i 3))
+                 (zerop (mod i 5)))
           summing i))
 
-(defun euler1 ()
+(defun euler-1 ()
   (euler-problem-1 1000))
 
 ;(proclaim (inline 'fib-assist)) ;cant remember syntax rn but thats a decent idea
@@ -27,7 +28,7 @@
   (reduce #'max (slow-prime-factorization value)))
 
 (defun euler-3 ()
-  (euler-problem-3 60085147514))
+  (euler-problem-3 600851475143))
   
 
 (defun generate-unique-vals (start end) ;; terrible name. will have to fix this later
@@ -122,41 +123,41 @@
   (reduce #'+ (collect-primes-under ceiling-value)))
 
 (defun euler-10 ()
-  (euler-problem-10 (expt 10 6)))
+  (euler-problem-10 (* 2 (expt 10 6))))
 
 
-(defun generate-indicies (seed-index)
-  (values
-   (list seed-index (+ seed-index 20) (+ seed-index 40) (+ seed-index 60))
-   (list seed-index (+ seed-index 1)  (+ seed-index 2)  (+ seed-index 3))
-   (list seed-index (+ seed-index 21) (+ seed-index 22) (+ seed-index 23))))
-;;; several of these indecies will be out of bounds or not adjacent, we deal with
-;;; in the next function
+;; (defun generate-indicies (seed-index)
+;;   (values
+;;    (if (> (mod seed-index 20) 16)
+;;        nil
+;;        (list seed-index (+ seed-index 20) (+ seed-index 40) (+ seed-index 60)))
+;;    (if (> seed-index 340)
+;;        nil
+;;        (list seed-index (+ seed-index 1)  (+ seed-index 2)  (+ seed-index 3)))
 
-(defun search-euler-11-space ()
-  (loop for index below (length +euler-11-data+)
-        with all-products = '()
-        with index->product = (lambda (&rest indicies)
-                                (ignore-errors
-                                 (reduce #'*
-                                         (mapcar (lambda (i)
-                                                   (aref +euler-11-data+ i))
-                                                 indicies))))
-        do (multiple-value-bind (vertical-indicies
-                                 horizontal-indicies
-                                 diagonal-indicies)
-               (generate-indicies index)
-             (push (apply index->product vertical-indicies) all-products)
-             (when (< (mod index 20) 17)
-               (push (apply index->product horizontal-indicies) all-products))
-             (when (and (< (mod index 20) 17)
-                        (< index 340)) ;; check if diagonal will be in adjacent
-               (push (apply index->product diagonal-indicies) all-products))
-             )
-        finally (return (reduce #'max (remove nil all-products)))))
+;;    (if (or (> (mod seed-index 20) 16) (> seed-index 340))
+;;            (list seed-index (+ seed-index 21) (+ seed-index 22) (+ seed-index 23)))))
+;; ;;; several of these indecies will be out of bounds or not adjacent, we deal with
+;; ;;; in the next function
 
-(defun euler-11 ()
-  (search-euler-11-space))
+;; (defun search-euler-11-space ()
+;;   (loop for index below (length +euler-11-data+)
+;;         with all-products = '()
+;;         with index->product = (lambda (&rest indicies)
+;;                                 (ignore-errors
+;;                                  (reduce #'* indicies :key (lambda (i)
+;;                                                              (aref +euler-11-data+ i)))))
+;;         do (multiple-value-bind (vertical-indicies
+;;                                  horizontal-indicies
+;;                                  diagonal-indicies)
+;;                (generate-indicies index)
+;;              (push (apply index->product vertical-indicies) all-products)
+;;              (push (apply index->product horizontal-indicies) all-products)
+;;              (push (apply index->product diagonal-indicies) all-products))
+;;         finally (return (reduce #'max (remove nil all-products)))))
+
+;; (defun euler-11 ()
+;;   (search-euler-11-space))
 
 
 ;; bug in above - will collect sqrt twice ie for 9 3 will appear twice
@@ -178,11 +179,10 @@
 
 
 (defun euler-problem-13 (value-array)
-  (mod (reduce #'+ value-array) 10000000000))
+  (mod (reduce #'+ value-array) 10000000000)) 
 
 (defun euler-13 ()
   (euler-problem-13 +euler-13-data+))
-
 
 (defun euler-problem-14 (ceiling-value)
   (loop for i from 1 to ceiling-value
@@ -306,12 +306,12 @@
 
 
 (defun euler-problem-21 (ceiling-value)
-  (loop for i from 1 to ceiling-value
+  (loop for i below ceiling-value
         when (amicable-number-p i)
           sum i))
 
 (defun euler-21 ()
-  (euler-problem-21 (expt 10 5)))
+  (euler-problem-21 (expt 10 4)))
 
 ;;; euler 22
 ;;;; use score-string function and map it across the sorted list of names with a closure which will then cause everyting to work out
@@ -322,7 +322,8 @@
                                                             (incf counter))))))
 
 (defun euler-22 ()
-  (euler-problem-22 +euler-21-data+))
+  (with-open-file (file-stream "resources/p022_names.txt" :direction :input)
+    (euler-problem-22 (mapcar #'read-from-string (cl-ppcre:split "," (read-line file-stream))))))
 
 ;;23
 ;;; collect all abundant numbers below the ceiling,
@@ -335,17 +336,14 @@
              (abundant-vals (loop for i from 1 to ceiling-value
                                   when (abundant-number-p i)
                                     collect i))
-             (reference-array (make-array ceiling-value :element-type 'bit))
-             
-             )
+             (reference-array (make-array ceiling-value :element-type 'bit)))
         (loop while abundant-vals
               as first-term = (pop abundant-vals)
               do (loop for second-term in abundant-vals
                        as sum-val = (+ first-term second-term)
                        never (> sum-val ceiling-value)
                        do (ignore-errors 
-                           (setf (bit reference-array (1- sum-val)) 1))
-                       ))
+                           (setf (bit reference-array (1- sum-val)) 1))))
     reference-array
     (loop for value from 1
           for valid-value across reference-array
@@ -362,7 +360,7 @@
        nth-term)) ;; major issues with the heap exaustion...
 
 (defun euler-24 ()
-  (euler-problem-24 9 (expt 10 6)))
+  (euler-problem-24 9 (1- (expt 10 6))))
 ;; we could create a generator and have it work until we have the 100th value
 
 
@@ -432,6 +430,9 @@
                  do (pushnew (expt a b) distinct-values :test #'=))
         finally (return (values (length distinct-values)
                                 distinct-values))))
+
+(defun euler-29 ()
+  (euler-problem-29 100))
 
 (defun power-digit-sum (number exponent)
   (reduce #'+ (write-to-string number)
@@ -732,11 +733,25 @@
             return (sort pent-d-lst #'< :key #'first)
           do (push next-in-seq pentagon-numbers))))
 
+(defun sequence-equality-finder (nth-match &rest number-generators)
+  (let ((num-generator-pairs (mapcar (lambda (generator)
+                                       (cons (funcall generator) generator))
+                                     number-generators)))
+    (loop
+      when (apply #'= (mapcar #'first num-generator-pairs))
+        count 1 into match-counter
+      when (= match-counter nth-match)
+        return (caar num-generator-pairs) ;; all three are the same, we pick the first one
+      do
+         
+         (setf num-generator-pairs (sort num-generator-pairs #'<= :key #'first))
+         (setf (caar num-generator-pairs) (funcall (cdar num-generator-pairs))))))
 
-
-
-
-  )
+(defun euler-45 ()
+  (sequence-equality-finder 2
+                            (create-pentagon-generator)
+                            (create-hexogon-generator)
+                            (create-triangle-generator)))
 
 ;;; 47 - distinct prime factors
 
@@ -749,6 +764,8 @@
     (loop for i from 1
           when (value-test i)
             return i)))
+
+
 
 
 (defun euler-47 ()

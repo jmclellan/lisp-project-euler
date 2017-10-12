@@ -122,7 +122,8 @@
 
 (defun amicable-number-p (n)
   (let ((digit-sum (reduce #'+ (proper-divisors n))))
-    (when (= n (reduce #'+ (proper-divisors digit-sum)))
+    (when (and (/= n digit-sum)
+               (= n (reduce #'+ (proper-divisors digit-sum))))
         (values t
                 (cons n digit-sum)))))
 
@@ -168,7 +169,26 @@ the order returned is depended in the order of the characters placed into it"
           (t (reciprocal-values divisor cur-mod (cons cur-mod previous-mods))))))
 
 
+(defun nth-pentagon-number (n)
+  (/ (* n (- (* 3 n) 1)) 2))
+
+(defun create-pentagon-generator ()
+  (let ((n 0))
+    (lambda ()
+      (nth-pentagon-number (incf n)))))
 
 
+(let ((n 0)
+      (pentagon-cache))
+  (defun pentagon-number-p (val)
+    (if (or (null pentagon-cache) (> val (car pentagon-cache)))
+        ;; if it is bigger we need to add valued till we can cover it
+        (loop as next-pentagon-number = (nth-pentagon-number (incf n)) ;; destructive modification
+              collecting next-pentagon-number into cache-additions
+              when (>= next-pentagon-number val)
+                ;; we could improve speed of this fn by getting rid of the call to sort
+                do (setf pentagon-cache (sort (append cache-additions pentagon-cache) #'>))
+                and return (pentagon-number-p val))
+        (member val pentagon-cache :test #'=))))
 
 
