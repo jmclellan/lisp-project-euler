@@ -761,7 +761,7 @@
          (= (length (distinct-prime-factors val)) distinct-factors))
        (value-test (val) 
          (every #'has-factors (range val (+ val (1- consecutive-ints))))))
-    (loop for i from 1
+    (loop for i from 2
           when (value-test i)
             return i)))
 
@@ -770,6 +770,30 @@
 
 (defun euler-47 ()
   (euler-problem-47 4 4))
+
+(defun euler-48 ()
+  (loop
+    with total-sum = 0
+    with summation-fn = (limited-digit-add 10)
+    for i from 1 to 1000
+    do (setf total-sum (funcall summation-fn total-sum (expt i i)))
+   finally (return total-sum)))
+
+
+;; (defvar primes (remove-if-not (lambda (str)
+;;                  (= (length str) 4))
+;;                               (mapcar #'write-to-string (collect-primes-under (expt 10 4)))))
+
+;; (loop for prime-str in primes
+;;       as perms  = (all-lex-perms prime-str)
+;;       as member-count = (count-if (lambda (str)
+;;                                     (member str primes :test #'string=))
+;;                                   perms)
+;;       when (= member-count 3)
+;;         collect (remove-if-not (lambda (str)
+;;                                 (member str primes :test #'string=))
+;;                                perms) into prime-tuples
+;;       finally (return prime-tuples))
 
 
 ;;(defun euler-problem-48 (ceiling-self-power scaling-fn)

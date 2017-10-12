@@ -23,6 +23,11 @@
 (defun nth-triangle-number (n)
   (/ (* n (+ n 1)) 2))
 
+(defun create-triangle-generator ()
+  (let ((n 0))
+    (lambda ()
+      (nth-triangle-number (incf n))))
+
 (let ((n 1)
       (triangle-cache (list (nth-triangle-number 1))))
       (defun triangle-number-p (val)
@@ -56,6 +61,11 @@
       (/ n 2)
       (1+ (* 3 n))))
 
+(defun limited-digit-add (number-of-digits)
+  "returns a function what will add and then mod the result so that only the number of
+   digits you are interested in will be returned "
+  (lambda (&rest summation-args)
+    (mod (reduce #'+ summation-args) (expt 10 number-of-digits))))
 
 ;;(let ((fn-results (make-array 10000000 :initial-element nil))) ;;million is magic #
 ;;  (defun collatz-seq (initial-value)
@@ -168,6 +178,13 @@ the order returned is depended in the order of the characters placed into it"
            (1+ (position cur-mod previous-mods :test #'=)))
           (t (reciprocal-values divisor cur-mod (cons cur-mod previous-mods))))))
 
+(defun nth-hexogonal-number (n)
+  (* n (- (* 2 n) 1)))
+
+(defun create-hexogon-generator ()
+  (let ((n 0))
+    (lambda ()
+      (nth-hexogonal-number (incf n)))))
 
 (defun nth-pentagon-number (n)
   (/ (* n (- (* 3 n) 1)) 2))
