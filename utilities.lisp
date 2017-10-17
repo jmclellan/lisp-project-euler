@@ -26,7 +26,7 @@
 (defun create-triangle-generator ()
   (let ((n 0))
     (lambda ()
-      (nth-triangle-number (incf n))))
+      (nth-triangle-number (incf n)))))
 
 (let ((n 1)
       (triangle-cache (list (nth-triangle-number 1))))
@@ -138,10 +138,10 @@
                 (cons n digit-sum)))))
 
 (defun perfect-number-p (n)
-  (= n (reduce #'+ (proper-divisors n))))
+  (= n (reduce #'+ (remove-duplicates (proper-divisors n) :test #'=))))
 
 (defun abundant-number-p (n)
-  (< n (reduce #'+ (proper-divisors n))))
+  (< n (reduce #'+ (remove-duplicates (proper-divisors n) :test #'=))))
 
 (defun alpha-pos (char)
   (if (alpha-char-p char)

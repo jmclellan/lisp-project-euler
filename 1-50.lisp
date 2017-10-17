@@ -126,38 +126,46 @@
   (euler-problem-10 (* 2 (expt 10 6))))
 
 
-;; (defun generate-indicies (seed-index)
-;;   (values
-;;    (if (> (mod seed-index 20) 16)
-;;        nil
-;;        (list seed-index (+ seed-index 20) (+ seed-index 40) (+ seed-index 60)))
-;;    (if (> seed-index 340)
-;;        nil
-;;        (list seed-index (+ seed-index 1)  (+ seed-index 2)  (+ seed-index 3)))
-
-;;    (if (or (> (mod seed-index 20) 16) (> seed-index 340))
-;;            (list seed-index (+ seed-index 21) (+ seed-index 22) (+ seed-index 23)))))
-;; ;;; several of these indecies will be out of bounds or not adjacent, we deal with
-;; ;;; in the next function
-
-;; (defun search-euler-11-space ()
-;;   (loop for index below (length +euler-11-data+)
-;;         with all-products = '()
-;;         with index->product = (lambda (&rest indicies)
-;;                                 (ignore-errors
-;;                                  (reduce #'* indicies :key (lambda (i)
-;;                                                              (aref +euler-11-data+ i)))))
-;;         do (multiple-value-bind (vertical-indicies
-;;                                  horizontal-indicies
-;;                                  diagonal-indicies)
-;;                (generate-indicies index)
-;;              (push (apply index->product vertical-indicies) all-products)
-;;              (push (apply index->product horizontal-indicies) all-products)
-;;              (push (apply index->product diagonal-indicies) all-products))
-;;         finally (return (reduce #'max (remove nil all-products)))))
-
-;; (defun euler-11 ()
-;;   (search-euler-11-space))
+(defun euler-11 ()
+  (flet ((find-all-combos (data-array h w)
+           (values
+            ;; horizontal
+            (ignore-errors (* (aref data-array h  w) 
+                              (aref data-array h (+ w 1))
+                              (aref data-array h (+ w 2))
+                              (aref data-array h (+ w 3))))
+            ;; vert 
+            (ignore-errors (* (aref data-array h  w)
+                              (aref data-array (+ h 1) w)
+                              (aref data-array (+ h 2) w)
+                              (aref data-array (+ h 3) w)))
+            ;; negative slope
+            (ignore-errors (* (aref data-array h  w)
+                              (aref data-array (+ h 1) (+ w 1))
+                              (aref data-array (+ h 2) (+ w 2))
+                              (aref data-array (+ h 3) (+ w 3))))
+            ;; positive slopw
+            (ignore-errors (* (aref data-array h  w)
+                              (aref data-array (+ h 1) (- w 1))
+                              (aref data-array (+ h 2) (- w 2))
+                              (aref data-array (+ h 3) (- w 3)))))))
+    (let* ((width 20)
+           (height 20)
+           (numbers-in-a-row 4)
+           (data-array  (with-open-file (fs "resources/p011_number grid.txt"
+                                            :direction :input)
+                          (loop repeat width
+                                collecting (loop repeat height
+                                                 collecting (read fs))
+                                  into rows
+                                finally (return (make-array (list 20 20)
+                                                            :initial-contents rows))))))
+      (loop for w below width
+            appending (loop for h below height
+                            appending (multiple-value-list (find-all-combos data-array h w)))
+              into all-products
+            finally (return (reduce #'max (remove nil all-products)))))))
+         
 
 
 ;; bug in above - will collect sqrt twice ie for 9 3 will appear twice
@@ -176,13 +184,21 @@
   (euler-problem-12 500))
 
 
+;;(defun euler-problem-13 (value-array)
+;;  (mod (reduce #'+ value-array) 10000000000)) 
+
+(defun euler-13 () 
+  (with-open-file (fs "resources/p013_large_sums.txt"
+                      :direction :input)
+    (loop as new-val = (read fs nil nil)
+          while new-val
+          summing new-val into total
+          finally (return (subseq
+                           (write-to-string total)
+                           0
+                           10)))))
 
 
-(defun euler-problem-13 (value-array)
-  (mod (reduce #'+ value-array) 10000000000)) 
-
-(defun euler-13 ()
-  (euler-problem-13 +euler-13-data+))
 
 (defun euler-problem-14 (ceiling-value)
   (loop for i from 1 to ceiling-value
@@ -333,23 +349,25 @@
 ;;; at the end count and return the number of nils remaining
 (defun euler-23 ()
   (let* ((ceiling-value 28123)
-             (abundant-vals (loop for i from 1 to ceiling-value
-                                  when (abundant-number-p i)
-                                    collect i))
-             (reference-array (make-array ceiling-value :element-type 'bit)))
-        (loop while abundant-vals
-              as first-term = (pop abundant-vals)
-              do (loop for second-term in abundant-vals
-                       as sum-val = (+ first-term second-term)
-                       never (> sum-val ceiling-value)
-                       do (ignore-errors 
-                           (setf (bit reference-array (1- sum-val)) 1))))
-    reference-array
-    (loop for value from 1
-          for valid-value across reference-array
-          when (zerop valid-value)
-            summing value)))
+         (abundant-vals (loop for i from 1 to ceiling-value
+                              when (abundant-number-p i)
+                                collect i))
 
+         (reference-array (make-array ceiling-value :element-type 'bit)))
+    (loop while abundant-vals
+          as first-term = (car abundant-vals)
+          do (loop for second-term in abundant-vals
+                   as sum-val = (+ first-term second-term)
+                   never (> sum-val ceiling-value)
+                   do (ignore-errors 
+                       (setf (bit reference-array (1- sum-val)) 1)))
+             (pop abundant-vals))
+     ;;reference-array
+     (loop for value from 1
+           for valid-value across reference-array
+           when (zerop valid-value)
+             summing value)))
+   
 
 ;;;; euler 24 needs to be compleated
 
@@ -366,7 +384,7 @@
 
 (defun euler-problem-25 (number-of-digits)
   (fib-index (lambda (value)
-               (>= value (expt 10 number-of-digits)))))
+               (>= value (expt 10 (1- number-of-digits))))))
 
 (defun euler-25 ()
   (euler-problem-25 1000))
@@ -386,25 +404,23 @@
 (defun euler-26 ()
   (euler-problem-26 (range 2 1000)))
 
-(defun euler-problem-27 (upper-limit)
+(defun euler-problem-27 (upper-limit-a upper-limit-b)
   (flet ((consecutive-primes (a b)
            (loop for n from 0
                  as quadratic-val = (+ (expt n 2) (* a n) b)
-                 unless (or (minusp quadratic-val) (slow-prime-p quadratic-val))
+                 when (or (minusp quadratic-val)
+                            (not (slow-prime-p quadratic-val)))
                    return n)))
-    ;;;(format t "~& a: ~a b: ~a result: ~a" -71 1601 (consecutive-primes -79 1601))
-    (loop for a from (- (abs upper-limit)) to (abs upper-limit)
+    (loop for a from (- (abs upper-limit-a)) to (abs upper-limit-a)
           with primes-product-cons = '(0 . 0)
-          do (loop for b from (- (abs upper-limit)) to (abs upper-limit)
+          do (loop for b in (collect-primes-under (abs upper-limit-b))
                    as consecutive-primes = (consecutive-primes a b)
-                   ;;do (format t "~%~4d ~5d ~a" a b consecutive-primes)
-                   when (> consecutive-primes (car primes-product-cons))
-                     do (setf primes-product-cons (cons consecutive-primes
-                                                        (* (abs a) (abs b)))))
+                   when (>= consecutive-primes (car primes-product-cons))
+                     do (setf primes-product-cons (cons consecutive-primes (* a b))))
           finally (return (cdr primes-product-cons)))))
 
 (defun euler-27 ()
-  (euler-problem-27 999))
+  (euler-problem-27 999 1000))
 
 (defun euler-problem-28 (spiral-dimension)
   (loop with diagonal-generator = (number-spiral-closure)
@@ -450,6 +466,22 @@
   (euler-problem-30 5 (expt 10 6)))
 
 ;;; 31-47 tbd
+
+;;; coin sums
+(defun coin-sums (total coin-lst)
+  (cond
+    ((or (minusp total) (null coin-lst)) 0)
+    ((zerop total) 1)
+    (t (+ (coin-sums (- total (car coin-lst)) coin-lst)
+          (coin-sums total (cdr coin-lst))))))
+
+(defun euler-problem-31 (total coin-lst)
+  (declare (inline coin-sums))
+  (coin-sums total coin-lst))
+
+(defun euler-31 ()
+  (euler-problem-31 200 (list 1 2 3 10 20 50 100 200)))
+
 
 ;;; 32
 
@@ -666,6 +698,24 @@
         do (setf n (- n (length str-i)))))
 
 
+
+(defun euler-problem-39 (ceiling-val)
+  (flet ((count-int-r-tris (p)
+           (loop for a from 1 to p
+                 with valid-triplet-count = 0
+                 do (loop for b from 1 to a
+                          as c = (- p a b)
+                          when (pythagorean-triplet-p a b c)
+                            do (incf valid-triplet-count))
+                 finally (return valid-triplet-count))))
+  (loop for p from 1 to ceiling-val
+        with max-pair = (cons 0 0)
+        as cur-count = (count-int-r-tris p)
+        when (>= cur-count (cdr max-pair))
+          do (setf max-pair (cons p cur-count))
+        finally (return (car max-pair)))))
+
+
 ;; (let ((chaper-cur-const ".1") ;;; fun idea but turned out to be abysmally slow on my machine
 ;;       (cur-counter 1))
 ;;   (defun get-nth-chapernows-digit (n) ;; closure + error handeling based recursion
@@ -753,6 +803,39 @@
                             (create-hexogon-generator)
                             (create-triangle-generator)))
 
+(defun composit-number-p (val)
+  (declare (inline slow-prime-p))
+  (cond ((= val 1) nil)
+        ((slow-prime-p val) nil)
+        (t t)))
+
+(defun odd-composit-p (val)
+  (declare (inline composit-number-p))
+  (and
+   (oddp val)
+   (composit-number-p val)))
+
+(defun golbacks-other-conjecture-p (val)
+  (loop for prime in (collect-primes-under val)
+        as found-pair = (loop for base from 1 to val
+                              as term = (* 2 (expt base 2))
+                              when (> (+ term prime) val)
+                                return nil
+                              when (= (+ term prime) val)
+                                return t)
+        when found-pair
+          return t))
+
+(defun euler-46 ()
+  (loop for i from 2
+        ;;;do (print i)
+        when  (and
+               (oddp i)
+               (not (slow-prime-p i))
+               (not (golbacks-other-conjecture-p i )))
+          return i))
+
+
 ;;; 47 - distinct prime factors
 
 (defun euler-problem-47 (distinct-factors consecutive-ints)
@@ -780,45 +863,25 @@
    finally (return total-sum)))
 
 
-;; (defvar primes (remove-if-not (lambda (str)
-;;                  (= (length str) 4))
-;;                               (mapcar #'write-to-string (collect-primes-under (expt 10 4)))))
-
-;; (loop for prime-str in primes
-;;       as perms  = (all-lex-perms prime-str)
-;;       as member-count = (count-if (lambda (str)
-;;                                     (member str primes :test #'string=))
-;;                                   perms)
-;;       when (= member-count 3)
-;;         collect (remove-if-not (lambda (str)
-;;                                 (member str primes :test #'string=))
-;;                                perms) into prime-tuples
-;;       finally (return prime-tuples))
-
-
-;;(defun euler-problem-48 (ceiling-self-power scaling-fn)
-;; (loop for i from 1 to ceiling-self-power
-;;       with total-sum = 0
-;;        do (setf total-sum (funcall scaling-fn (+ total-sum (expt i i))))
-;;        finally (return total-sum)))
-
-;;(defun euler-48 ()
-;;  (euler-problem-48 1000 (lambda (val) (mod val (expt 10 10)))))
-
-
-;;(time (remove-if (lambda (v) (< v 1000)) (collect-primes-under (expt 10 4))))
-
-;;(time (let* ((valid-primes (remove-if (lambda (v) (or (< v 1000)
-;;                                                      (not (slow-prime-p v))))
-;;                                      (collect-primes-under (expt 10 4))))
-;;             (prime-datums (mapcar (lambda (prime)
-;;                                     (list prime
-;;                                           (sort (write-to-string prime) #'char<)))
-;;                                   valid-primes)))
-;;        (print prime-datums)
-;;        (mapcar #'(lambda (prime-datum)
-;;                    (cons (count-if (lambda (datums)
-;;                                      (string= (second prime-datum) (second datums));;) 
-;;                                    prime-datums) prime-datum)) prime-datums)
-;;        t))
-
+(defun euler-49 ()
+  (loop
+    with all-primes = (mapcar #'write-to-string
+                              (remove-if (lambda (prime)
+                                           (< prime 1000))
+                                         (collect-primes-under 10000)))
+    for prime-str in all-primes
+    as prime-permutations = (all-lex-perms prime-str)
+    when (every (lambda (val)
+                  (and
+                   (not (string= (write-to-string val) "1487"))
+                   (member (write-to-string val) all-primes :test #'string=)
+                   (member (write-to-string val) prime-permutations :test #'string=)))
+                (let ((val (parse-integer prime-str)))
+                  (list val 
+                        (+ val 3330)
+                        (+ val 3330 3330))))
+      
+      return (concatenate 'string
+                           prime-str
+                           (write-to-string (+ (parse-integer prime-str) 3330))
+                           (write-to-string (+ (parse-integer prime-str) 3330 3330)))))
