@@ -12,6 +12,7 @@
                 (:file "sequences")
                 (:file "utilities")
                 (:file "1-50")
+                (:file "51-100")
                ))
 
 (ql:quickload :cl-ppcre)

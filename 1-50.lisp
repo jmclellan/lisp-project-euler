@@ -885,3 +885,36 @@
                            prime-str
                            (write-to-string (+ (parse-integer prime-str) 3330))
                            (write-to-string (+ (parse-integer prime-str) 3330 3330)))))
+
+;; (loop
+;;   with ceiling-val = (expt 10 2)
+;;   with prime-pool = (collect-primes-under ceiling-val)
+;;   with result-lst = '()
+;;   for prime-sub-lst on prime-pool
+;;   do (print (length prime-sub-lst))
+;;      (loop for subsection on (reverse prime-sub-lst)
+;;            do (loop for val in subsection
+;;                     summing val into total-sum
+;;                     when (> val ceiling-val)
+;;                       return nil
+;;                     finally (when (member total-sum prime-pool :test #'=)
+;;                               (push (cons total-sum (length subsection)) result-lst))))
+;;   finally (return result-lst))
+
+;; (defvar prime-cons (loop
+;;                      for i from 1
+;;                      for prime in (collect-primes-under (expt 10 2))
+;;                          summing prime into aggregate
+;;                          collecting (list i prime aggregate)))
+
+;; (loop
+;;   with results = nil
+;;   for (upper-n upper-prime  upper-aggregate) in prime-cons   
+;;   do (loop for (lower-n lower-prime  lower-aggregate) in prime-cons
+;;            as subset-sum = (- upper-aggregate lower-aggregate)
+;;            when (or (= upper-n lower-n) (> subset-sum (expt 10 2)))
+;;              return nil
+;;            when (slow-prime-p subset-sum)
+;;              do (push (cons subset-sum (- upper-n lower-n)) results))
+;;   finally (return results))
+
