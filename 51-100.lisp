@@ -34,12 +34,18 @@
                  as cur-value = (expt a b)
                  as cur-digit-sum = (digit-sum cur-value)
                  when (> cur-digit-sum max-digit-sum)
-                   do (setf max-digit-sum cur-digit-sum)
-                 )
+                   do (setf max-digit-sum cur-digit-sum))
         finally (return max-digit-sum)))
 
+;; (defun euler-toitent-function (val)
+;;   (reduce #'* (slow-prime-factorization val) :key #'1-))
+
 (defun euler-toitent-function (val)
-  (reduce #'* (slow-prime-factorization val) :key #'1-))
+  "using eulers product formula"
+  (reduce #'* (distinct-prime-factors val)
+          :key (lambda (prime)
+                 (- 1  (/ 1 prime)))
+          :initial-value val))
 
 (defun euler-problem-69 (ceiling)
   (loop for i from 2 to ceiling
@@ -47,11 +53,29 @@
         with ratio = 0
         as toitent = (euler-toitent-function i)
         as cur-ratio = (/ i toitent)
-        do (format t "~&~a ~a ~a" i toitent cur-ratio)
         when (> cur-ratio ratio)
           do (setf max-i i
                    ratio cur-ratio)
         finally (return max-i)))
+
+(defun euler-69 ()
+  (euler-problem-69 (expt 10 6)))
+
+(defun permutation-p (str1 str2)
+  (string= (sort str1 #'char<=) (sort str2 #'char<=)))
+
+(defun numerical-permutation-p (val1 val2)
+  (permutation-p (write-to-string val1) (write-to-string val2)))
+
+(defun euler-problem-70 (ceiling-value)
+  (loop for n from 2 to (1- ceiling-value)
+        with n.ratio = (cons 0 0)
+        as toitent-val = (euler-toitent-function n)
+        as cur-ratio = (/ n toitent-val)
+        when (and (numerical-permutation-p n toitent-val)
+                  (< cur-ratio (cdr n.ratio)))
+          do (setf n.ratio (cons n cur-ratio))
+        finally (return (car n.ratio))))
 
 (defun euler-problem-71 (max-denominator target-fraction)
   (loop for denom from 1 to max-denominator
@@ -68,7 +92,12 @@
 (defun euler-71 ()
   (numerator (euler-problem-71 (expt 10 6) 3/7)))
 
-;;; for 72 i think i can use the toitent function once it is fixed up
+(defun euler-problem-72 (ceiling-value)
+  (loop for denominator from 2 to ceiling-value
+       summing (euler-toitent-function denominator)))
+
+(defun euler-72 ()
+  (euler-problem-72 (expt 10 6)))
 
 (defun euler-problem-73 (max-denominator lower-fence upper-fence)
   (loop for denom from 1 to max-denominator
@@ -92,21 +121,21 @@
                                            (factorial (digit-char-p digit-char)))))
 
 
+(defun digit-factorial-chain (val)
+  (loop
+    with cur-val = (digit-factorial val)
+    if (or (= cur-val val) (member cur-val chain :test #'=))
+      return (values (1+ chain-length) (cons val chain) cur-val)
+    else collect cur-val into chain
+         and count 1 into chain-length
+         and do (setf cur-val (digit-factorial cur-val))))
 
+(defun euler-problem-74 (ceiling-value)
+  (time (loop for i from 1 to ceiling-value
+              as chain-length = (digit-factorial-chain i)
+            when (= chain-length 60)
+              count 1 into long-chain-count
+              finally (return long-chain-count))))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+(defun euler-74 ()
+  (euler-problem-74 (expt 10 6)))
