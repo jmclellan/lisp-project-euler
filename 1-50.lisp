@@ -268,7 +268,7 @@
 (defun euler-18 ()
   (euler-problem-18))
 
-;;;; do 19
+
 
 (setq *print-circle* t)
 
@@ -292,27 +292,36 @@
           (t 30))))
 
 
-;;(let ((days (make-circular '("MON" "TUE" "WED"
+;; (let ((days (make-circular '("MON" "TUE" "WED"
 ;;                             "THU" "FRI" "SAT"
 ;;                             "SUN")))
 ;;      (months (make-circular '("JAN" "FEB" "MAR" "APR" "MAY" "JUN"
 ;;                               "JUL" "AUG" "SEP" "OCT" "NOV" "DEC"))))
-;;      (loop for year from 1900
-;;        with days-of-note = 0
-;;            do (loop as month = (pop months)
-;;                     do (loop for day from 1
-;;                              as day-of-week = (pop days)
-;;                              when (< day (days-in-month month year))
-;;                                return nil
-;;                              do (format t "day: ~3d Month: ~a Year: ~4d"
-;;                                         day month year)
-;;                              )
-;;        )))
+;;   (loop for year from 1900
+;;         with days-of-note = 0
+;;         when (= year 2010)
+;;           return nil
+;;         do (print year)
 
+;;            (loop as month = (pop months)
+;;                  when (string= month "DEC")
+;;                    return nil
+;;                  do (print month)
+                    
+;;                     (loop for day from 1
+;;                           as day-of-week = (pop days)
+;;                           when (< day (days-in-month month year))
+;;                             return nil
 
-;;;;
-;;(defun hi-jill ()
-;;  (format t "~&hey, your cute"))
+;;                           do (incf days-of-note)
+;;                              (format t "day: ~3d Month: ~a Year: ~4d"
+;;                                      day month year)
+;;                           )
+;;                  )
+;;         finally (return days-of-note)
+;;         )
+;;   )
+
 
 (defun euler-problem-20 (val)
   (digit-sum (factorial val)))

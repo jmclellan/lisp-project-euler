@@ -1,5 +1,16 @@
 (in-package :euler)
 
+(defun euler-problem-52 (multiples)
+  (loop for i from 2
+      as multiple-list = (mapcar (lambda (multiple)
+                                   (* i multiple))
+                                 multiples)
+      when (apply #'numerical-permutations-p multiple-list)
+        return multiple-list))
+
+(defun euler-52 ()
+  (euler-problem-52 (range 1 6)))
+
 (defun n-choose-r (n r)
   (/ (factorial n)
      (* (factorial r) (factorial (- n r)))))
@@ -40,6 +51,13 @@
 ;; (defun euler-toitent-function (val)
 ;;   (reduce #'* (slow-prime-factorization val) :key #'1-))
 
+;; 58 is going to be using the #'number-spiral-closure that was made earlier for another function
+
+;; this uses the same code as 18 
+(defun euler-67 ()
+  (pyramid-reduction (read-pyramid-data "resources/p067_triangle.txt")))
+
+
 (defun euler-toitent-function (val)
   "using eulers product formula"
   (reduce #'* (distinct-prime-factors val)
@@ -67,15 +85,23 @@
 (defun numerical-permutation-p (val1 val2)
   (permutation-p (write-to-string val1) (write-to-string val2)))
 
-(defun euler-problem-70 (ceiling-value)
-  (loop for n from 2 to (1- ceiling-value)
-        with n.ratio = (cons 0 0)
-        as toitent-val = (euler-toitent-function n)
-        as cur-ratio = (/ n toitent-val)
-        when (and (numerical-permutation-p n toitent-val)
-                  (< cur-ratio (cdr n.ratio)))
-          do (setf n.ratio (cons n cur-ratio))
-        finally (return (car n.ratio))))
+(defun numerical-permutations-p (&rest numeric-args)
+  (let ((sorted-numeric-strings (mapcar #'(lambda (val)
+                                            (sort (write-to-string val) #'char<=))
+                                        numeric-args)))
+    (every #'(lambda (str)
+               (string= (car sorted-numeric-strings) str))
+           (cdr sorted-numeric-strings))))
+
+;; (defun euler-problem-70 (ceiling-value)
+;;   (loop for n from 2 to (1- ceiling-value)
+;;         with n.ratio = (cons 0 0)
+;;         as toitent-val = (euler-toitent-function n)
+;;         as cur-ratio = (/ n toitent-val)
+;;         when (and (numerical-permutation-p n toitent-val)
+;;                   (< cur-ratio (cdr n.ratio)))
+;;           do (setf n.ratio (cons n cur-ratio))
+;;         finally (return (car n.ratio))))
 
 (defun euler-problem-71 (max-denominator target-fraction)
   (loop for denom from 1 to max-denominator
@@ -117,8 +143,9 @@
   (euler-problem-73 12000 1/3 1/2))
 
 (defun digit-factorial (val)
-  (reduce #'+ (write-to-string val) :key (lambda (digit-char)
-                                           (factorial (digit-char-p digit-char)))))
+  (reduce #'+ (write-to-string val)
+          :key (lambda (digit-char)
+                 (factorial (digit-char-p digit-char)))))
 
 
 (defun digit-factorial-chain (val)
