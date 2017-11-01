@@ -166,3 +166,67 @@
 
 (defun euler-74 ()
   (euler-problem-74 (expt 10 6)))
+
+
+;;92
+(defun square-digit-sum (val)
+  (reduce #'+ (write-to-string val) :key (lambda (char) (expt (digit-char-p char) 2))))
+
+(defun square-digit-chain (val &optional existing-chain)
+  (if (or (= val 89) (= val 1))
+      (values val existing-chain) ; the order of this chain is reveresed
+      (square-digit-chain (square-digit-sum val) (cons val existing-chain))))
+
+(defun euler-92 ()
+  (loop for i from 1 to (1- (expt 10 7)) ; 10 million
+        as cur-chain-result = (square-digit-chain i)
+        when (= cur-chain-result 89)
+          count 1))
+
+;; (defun memoized-square-digit-chain (cache-length)
+;;   (let ((cache (make-array cache-length :initial-element nil))) 
+;;     (labels ((square-digit-chain (val &optional existing-chain)
+;;                                  (cond ((and (< val (1- cache-length)) ; fits in our cache
+;;                                              (aref cache val)) ; non-nil value
+;;                                         ;; we have a value and we know where it ends up
+;;                                         ;; fill out the cahce for all values
+;;                                         (mapcar
+;;                                          (lambda (chain-link)
+;;                                            (when (< chain-link (1- cache-length))
+;;                                              (setf (aref cache chain-link) (aref cache val))))
+;;                                          existing-chain)
+;;                                         (aref cache val)) ; then just return the value
+;;                                        ((or (= val 89) (= val 1))
+;;                                         (mapcar
+;;                                          (lambda (chain-link)
+;;                                            (when (< chain-link (1- cache-length))
+;;                                              (setf (aref cache chain-link) (aref cache val))))
+;;                                          existing-chain)
+;;                                         (values val existing-chain))
+;;                                        (t (square-digit-chain (square-digit-sum val)
+;;                                                               (cons val existing-chain))))))
+;;             #'square-digit-chain
+      
+;;       )
+;;     )
+;;   )
+
+;;; memoize a large swath of values and then use that to keep track of values to speed
+;;; up iterating through the all the values under ten million 
+
+
+(defun euler-99 ()
+  (let ((data (with-open-file (file "resources/p099_base_exp.txt" :direction :input)
+                (loop
+                  for counter from 1
+                  as data = (read-line file nil)
+                  ;;do (format t "~&line ~d data is ~a" counter data)
+                  unless data
+                    return data-set
+                  collect (cons counter (cl-ppcre:split "," data)) into data-set))))
+    (car (reduce #'(lambda (a b)
+                (if (> (* (parse-integer (third a)) (log (parse-integer (second a))))
+                       (* (parse-integer (third b)) (log (parse-integer (second b)))))
+                    a 
+                    b))
+            data))))
