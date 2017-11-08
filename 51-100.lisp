@@ -52,6 +52,40 @@
 ;;   (reduce #'* (slow-prime-factorization val) :key #'1-))
 
 ;; 58 is going to be using the #'number-spiral-closure that was made earlier for another function
+;; (defun euler-58 ()
+;;   (loop for side-length from 1 by 2
+;;         with corner-generator = (number-spiral-closure)
+;;         with total = 1
+;;         with primes = 0
+;;         do (loop repeat 4 ;; this loop adds one more layer to our count
+;;                    initially (incf total 4) ;; there will always be 4 corners
+;;                  as next-corner = (funcall corner-generator) ; gen actual values 
+;;                  when (slow-prime-p next-corner) ; check for primality & handle accordingly
+;;                    do (incf primes))
+;;         when (<= (/ primes total) 1/10)
+;;           return side-length))
+
+
+;;; euler 63
+#|
+=> 10^(n-1) <= x^n < 10^(n)
+=> (n-1)*log(10) <= n*log(x) < (n)*log(10)
+-- log(10) using base 10 is 1 --
+=> (n-1) <= n*log(x) < (1)
+=> (n-1)/n <= log(x) < (n)/n
+=> 10^(n-1)/n) <= x < 10^(n)/n)
+=> 10^(n-1)/n) <= x < 10
+we want to iterate through all n until 10 - 10^(n-1)/n) is less than 1
+|#
+(defun euler-63 ()
+  (loop for n from 1
+      as lower-bound = (expt 10 (/ (1- n) n))
+      ;; the upper bound is 10 based on the rewrite of the formula
+      until (<= (- 10 lower-bound) 1)
+      as integer-distance = (truncate  (- 10 lower-bound) 1)
+      unless (zerop integer-distance)
+        summing integer-distance))
+
 
 ;; this uses the same code as 18 
 (defun euler-67 ()
