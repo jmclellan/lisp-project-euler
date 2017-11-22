@@ -886,10 +886,10 @@
                    (member (write-to-string val) all-primes :test #'string=)
                    (member (write-to-string val) prime-permutations :test #'string=)))
                 (let ((val (parse-integer prime-str)))
-                  (list val 
+                  (list val
                         (+ val 3330)
                         (+ val 3330 3330))))
-      
+
       return (concatenate 'string
                            prime-str
                            (write-to-string (+ (parse-integer prime-str) 3330))
@@ -927,3 +927,25 @@
 ;;              do (push (cons subset-sum (- upper-n lower-n)) results))
 ;;   finally (return results))
 
+
+(defun euler-problem-50 (max-value)
+    (flet ((consecutive-totals (lst)
+         "takes a list of numbers and returns a list where the nth element is equal to the
+          sum of the 0-n elements of the original list when an aggregegate-max is given the
+          new list cuts off once the total is greater then that val"
+               (loop for ele in lst
+                     for sub-list-length from 1
+                     summing ele into total
+                     when (>= total max-value)
+                       return sum-lst
+                     collecting (cons total sub-list-length) into sum-lst
+                     finally (return sum-lst))))
+      (let* ((all-primes (collect-primes-under max-value))
+             (all-consecutive-prime-totals ; list of consed pairs
+               (apply #'append (maplist #'consecutive-totals all-primes)))
+             (filtered-prime-tuples (remove 1 all-consecutive-prime-totals :key #'cdr))
+             (largest-tuple (find-if #'slow-prime-p
+                                     (sort filtered-prime-tuples #'>= :key #'cdr)
+                                     :key #'car))
+             )
+        (values (car largest-tuple) (cdr largest-tuple)))))
