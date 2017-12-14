@@ -23,6 +23,27 @@
                  do (incf total-count))
          finally (return total-count)))
 
+;;; euler-54
+;; (with-open-file (in "resources/p054_poker.txt" 
+;;                     :direction :input)
+;;   (defvar test-cards (cl-ppcre:split " " (read-line in))))
+;; (defvar hand1 (subseq test-cards 0 5))
+;; (defvar hand2 (subseq test-cards 5))
+
+;; (defun royal-flush-p (hand)
+;;   ""
+;;   (char= (mapcar (lambda (card)
+;;                    (aref card 1))
+;;                  hand)
+;;   )
+
+(defclass card ()
+  ((value :reader card-value :initarg :card-value)
+   (suit :reader suit :initarg :suit)
+   )
+    )
+
+
 (defun reverse-number (val)
   (parse-integer (reverse (write-to-string val))))
 
@@ -64,6 +85,41 @@
 ;;                    do (incf primes))
 ;;         when (<= (/ primes total) 1/10)
 ;;           return side-length))
+
+(defun cube-p (val)
+  (multiple-value-bind (integer remainder)
+      (truncate (expt val 1/3))
+    (declare (ignore integer))
+    (zerop remainder)))
+
+;; loop for n
+;; find the n^3
+;; find all lexical permutations of n^3
+;; count how many permutations are cube values
+
+;; (loop
+;;   with reference-key = nil
+;;   for n from 1 to 1000
+;;   as n-cubed = (expt n 3)
+;;   as cubed-digit-str = (sort (write-to-string n-cubed) #'char>)
+;;   as record = (list :digits cubed-digit-str :val n :count 1)
+;;   do (pprint reference-key)
+;;      do (pprint record)
+;;   if (find cubed-digit-str reference-key
+;;            :key (lambda (plst)
+;;                   (getf plst :digits))
+;;            :test #'string=)
+;;     do (format t "~&the record does indeed exist")
+;;        (incf (getf (find cubed-digit-str reference-key
+;;                          :key (lambda (plst)
+;;                                 (getf plst :digits))
+;;                          :test #'string=) :count))
+;;   else do 
+;;     (format t "the record does not exist")
+;;     (push record reference-key)
+;;   finally (return reference-key))
+
+
 
 
 ;;; euler 63

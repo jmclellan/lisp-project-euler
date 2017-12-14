@@ -99,23 +99,6 @@
         when triplet
           return (values (apply #'* triplet) triplet)))
 
-
-
-;;;(defun euler-problem-9 (goal-value)
-;;;    (loop for a from 1
-;;;      with triplets = nil
-;;;          until (> a goal-value)
-;;;      do (loop for b from (1+ a)
-;;;               until (> (+ a b) goal-value)
-;;;               do (loop for c from (1+ b)
-;;;                        until (> (+ a b c) goal-value)
-;;;                        when (= (+ a b c ) goal-value)
-;;;                          do (push (list a b c) triplets)))
-;;;          finally (return (apply #'* (car (remove-if-not #'(lambda (trip)
-;;;                                     (apply #'pythagorean-triplet-p trip))
-;;;                                 triplets))))))
-                     
-
 (defun euler-9 ()
   (euler-problem-9 1000 1000))
 
@@ -183,10 +166,6 @@
 (defun euler-12 ()
   (euler-problem-12 500))
 
-
-;;(defun euler-problem-13 (value-array)
-;;  (mod (reduce #'+ value-array) 10000000000)) 
-
 (defun euler-13 () 
   (with-open-file (fs "resources/p013_large_sums.txt"
                       :direction :input)
@@ -197,8 +176,6 @@
                            (write-to-string total)
                            0
                            10)))))
-
-
 
 (defun euler-problem-14 (ceiling-value)
   (loop for i from 1 to ceiling-value
@@ -269,7 +246,6 @@
   (euler-problem-18))
 
 
-
 (setq *print-circle* t)
 
 (defun make-circular (lst)
@@ -292,35 +268,32 @@
           (t 30))))
 
 
-;; (let ((days (make-circular '("MON" "TUE" "WED"
-;;                             "THU" "FRI" "SAT"
-;;                             "SUN")))
-;;      (months (make-circular '("JAN" "FEB" "MAR" "APR" "MAY" "JUN"
-;;                               "JUL" "AUG" "SEP" "OCT" "NOV" "DEC"))))
-;;   (loop for year from 1900
-;;         with days-of-note = 0
-;;         when (= year 2010)
-;;           return nil
-;;         do (print year)
+ ;; (let ((days (make-circular '("MON" "TUE" "WED"
+ ;;                            "THU" "FRI" "SAT"
+ ;;                            "SUN")))
+ ;;     (months (make-circular '("JAN" "FEB" "MAR" "APR" "MAY" "JUN"
+ ;;                              "JUL" "AUG" "SEP" "OCT" "NOV" "DEC"))))
+ ;;   (loop
+ ;;    ;; for i from 1 to 30
+ ;;     with total-count = 0
+ ;;     with year = 1900
+ ;;     as month = (pop months)
+ ;;     do (loop for day from 1 to (days-in-month month year)
+ ;;              as daystr = (pop days)
+ ;;              ;do (format t "~%~a ~d, ~d was a ~a" month day year daystr)
+ ;;              when (and (= day 1)
+ ;;                        (string-equal daystr "SUN")
+ ;;                        (>= year 1901))
+ ;;                do
+ ;;                   (format t "~%~a ~d, ~d was a ~a" month day year 
+ ;;                   (incf total-count))
+ ;;     when (and (= year 2000) (string-equal month "DEC"))
+ ;;       return total-count
+ ;;     when (string-equal month "DEC")
+ ;;       do (incf year)))
 
-;;            (loop as month = (pop months)
-;;                  when (string= month "DEC")
-;;                    return nil
-;;                  do (print month)
-                    
-;;                     (loop for day from 1
-;;                           as day-of-week = (pop days)
-;;                           when (< day (days-in-month month year))
-;;                             return nil
 
-;;                           do (incf days-of-note)
-;;                              (format t "day: ~3d Month: ~a Year: ~4d"
-;;                                      day month year)
-;;                           )
-;;                  )
-;;         finally (return days-of-note)
-;;         )
-;;   )
+
 
 
 (defun euler-problem-20 (val)
