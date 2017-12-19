@@ -69,6 +69,26 @@
                    do (setf max-digit-sum cur-digit-sum))
         finally (return max-digit-sum)))
 
+;;; euler 57
+(defun euler-problem-57 (n)
+  (labels ((sqrt-2-apx (k)
+             "infinite continued fraction where k is the depth we evaluate too"
+             (/ 1
+                (+ 2 (if (zerop k)
+                         0
+                         (fn (- k 1))))))
+           (larger-numerator-p (fraction)
+             "tests to see if the numerator has more digits than the denominator"
+             (> (length (write-to-string (numerator fraction)))
+                (length (write-to-string (denominator fraction))))))
+    (loop for i from 1 to n
+          when (larger-numerator-p (1+ (sqrt-2-apx i)))
+            count 1)))
+
+
+(defun euler-57 ()
+  (euler-problem-57 1000))
+
 ;; (defun euler-toitent-function (val)
 ;;   (reduce #'* (slow-prime-factorization val) :key #'1-))
 
@@ -119,7 +139,17 @@
 ;;     (push record reference-key)
 ;;   finally (return reference-key))
 
+;;;euler-59
 
+(defun convert-to-chars (digit-list)
+  (coerce (mapcar #'code-char digit-list) 'string))
+
+;;; how do i run code that will not requre me to review it?
+;;(setf common-words (list "the" "be" "to" "of" "and" "a" "in" "that" "have" "for" "not"))
+
+;;; use the logxor inorder to avoid having to do any number->bit-array conversions
+;;(with-open-file (file "resources/p059_cipher.txt" :direction :input)
+;;  (mapcar #'parse-integer (cl-ppcre:split "," (read-line file)))) ;; list of numbers
 
 
 ;;; euler 63
@@ -142,6 +172,25 @@ we want to iterate through all n until 10 - 10^(n-1)/n) is less than 1
       unless (zerop integer-distance)
         summing integer-distance))
 
+;;;;; euler 65
+;; implemented from c# code
+;; still unsure of how exactly we determine this pattern from the
+;; continued fraction description
+(defun euler-problem-65 (nth-numerator)
+  (assert (>= nth-numerator 2))
+    (loop for i from 2 to nth-numerator
+      with d = 1
+      with n = 2
+      as temp = d
+      as c = (if (zerop (mod i 3))
+                 (* 2 (/ i 3))
+                 1)
+      do (setf d n
+               n (+ (* c d) temp))
+          finally (return (digit-sum n))))
+
+(defun euler-65 ()
+  (euler-problem-65 100))
 
 ;; this uses the same code as 18 
 (defun euler-67 ()
@@ -256,6 +305,34 @@ we want to iterate through all n until 10 - 10^(n-1)/n) is less than 1
 
 (defun euler-74 ()
   (euler-problem-74 (expt 10 6)))
+
+;; what does brute force look like for 76
+(let ((target 5))
+  (loop for first-int from 1 to (1- target)
+        with total-count = 0
+        do (loop for second-int from 1 to (1- first-int)
+                   initially ;; 0 case
+                             (when (zerop (mod target first-int))
+                               ;; (format t "~&~d(~d)+~d(~d)=~d"
+                               ;;         (ceiling target first-int)
+                               ;;         first-int
+                               ;;         0
+                               ;;         0
+                               ;;         target)
+                               (incf total-count)
+                               )
+                 do (loop for multiplier from 1
+                          as first-sum = (* first-int multiplier)
+                          ;as validity-check =
+                          when (< target first-sum)
+                            return 0
+                          when (zerop (mod (- target first-sum) second-int))
+                            do (incf total-count)
+                            ;; do (format t "~&~d(~d)+~d(~d)=~d"
+                            ;;            multiplier first-int
+                            ;;            (ceiling (- target first-sum) second-int) second-int
+                            ;;            target)
+                          ))))
 
 ;;; euler 89
 
